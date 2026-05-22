@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from app.pdf_loader import load_pdf
 
 app = FastAPI(
     title="Enterprise RAG Assistant",
@@ -8,6 +9,10 @@ app = FastAPI(
 
 @app.get("/")
 def home():
+
+    pdf_text = load_pdf("data/sample.pdf")
+
     return {
-        "message": "Enterprise RAG Assistant Running Successfully"
+        "message": "PDF Loaded Successfully",
+        "characters": len(pdf_text)
     }
