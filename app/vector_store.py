@@ -9,10 +9,12 @@ load_dotenv()
 
 
 def create_vector_store(chunks):
+
     logger.info("=" * 60)
     logger.info("Creating Vector Store...")
     logger.info(f"Total Chunks : {len(chunks)}")
     logger.info("Generating Azure OpenAI Embeddings...")
+
     embeddings = AzureOpenAIEmbeddings(
         azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         api_key=os.getenv("AZURE_OPENAI_API_KEY"),
@@ -20,11 +22,27 @@ def create_vector_store(chunks):
         azure_deployment=os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT")
     )
 
-    logger.info(f"Generating embeddings for {len(chunks)} chunks...")
+    # ----------------------------------------
+    # Separate text and metadata
+    # ----------------------------------------
+
+    texts = []
+    metadatas = []
+
+    for chunk in chunks:
+        texts.append(chunk["text"])
+        metadatas.append({
+            "source": chunk["source"]
+        })
+
+    logger.info(f"Generating embeddings for {len(texts)} chunks...")
+
     vector_store = FAISS.from_texts(
-        texts=chunks,
-        embedding=embeddings
+        texts=texts,
+        embedding=embeddings,
+        metadatas=metadatas
     )
+
     logger.info("FAISS Vector Store Created Successfully")
     logger.info("Vector Store Ready")
 

@@ -1,28 +1,56 @@
 # PDF loading logic
+import os
 import fitz
 from app.logger import logger
 
 
-def load_pdf(pdf_path: str) -> str:
+def load_all_pdfs(data_folder: str):
     """
-    Load PDF and extract text
+    Load all PDF files from the data folder.
+    Returns:
+        [
+            {
+                "source": "sample.pdf",
+                "text": "..."
+            },
+            ...
+        ]
     """
+
+    documents = []
 
     logger.info("=" * 60)
-    logger.info("Loading PDF...")
-    logger.info(f"PDF Path: {pdf_path}")
+    logger.info("Loading PDF Documents...")
 
-    document = fitz.open(pdf_path)
-    full_text = ""
-    
-    page_count = len(document)
+    for filename in os.listdir(data_folder):
 
-    for page in document:
-        full_text += page.get_text()
+        if not filename.lower().endswith(".pdf"):
+            continue
 
-    document.close()
-    logger.info(f"Total Pages: {page_count}")
-    logger.info(f"Characters Extracted: {len(full_text)}")
-    logger.info("PDF Loaded Successfully")
+        pdf_path = os.path.join(data_folder, filename)
 
-    return full_text
+        logger.info("-" * 50)
+        logger.info(f"Loading: {filename}")
+
+        document = fitz.open(pdf_path)
+
+        full_text = ""
+
+        for page in document:
+            full_text += page.get_text()
+
+        total_pages = len(document)
+        document.close()
+
+        logger.info(f"Pages : {total_pages}")
+        logger.info(f"Characters : {len(full_text)}")
+
+        documents.append({
+            "source": filename,
+            "text": full_text
+        })
+
+    logger.info("=" * 60)
+    logger.info(f"Total PDF Documents Loaded : {len(documents)}")
+
+    return documents
